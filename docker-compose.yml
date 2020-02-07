@@ -1,0 +1,31 @@
+version: "3"
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.2
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+
+  apm-server:
+    image: docker.elastic.co/apm/apm-server:7.5.2
+    ports:
+      - "8200:8200"
+    depends_on:
+      - elasticsearch
+    command: ["--strict.perms=false", "-e"]
+    volumes:
+      - ./apm-server.docker.yml:/usr/share/apm-server/apm-server.yml:ro
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.5.2
+    ports:
+      - "5601:5601"
+    depends_on:
+      - apm-server
+
+networks:
+  default:
+    driver: bridge
